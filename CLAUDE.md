@@ -79,27 +79,37 @@ Vercel (frontend)                          n8n (backend)
 - Poll the n8n status webhook with that `submissionId`. While pending/rendering, show a persistent "Don't close this window — your video is being generated" message. Once complete, show a **Download** button (linking to the video URL). This is the only delivery mechanism — no email or Slack notification.
 - Nothing else — no business logic, validation beyond basic form checks, or video processing happens client-side; that all stays in n8n + Creatomate.
 
-**Where it lives:** `/frontend/` — a Next.js/React app, deployed to Vercel independently of the n8n workflow. Built with the `frontend-design` skill (installed separately) for the visual/UX work.
+**Where it lives:** `/frontend/` — a Next.js (App Router, TypeScript, Tailwind v4) app, deployed to Vercel independently of the n8n workflow. Built with the `frontend-design` skill for the visual/UX work — see §8 for the design direction.
+
+**Photo uploads → Vercel Blob, not through the server:** the 4 photo files (3 property + realtor) are uploaded **directly from the browser** to Vercel Blob via `upload()` from `@vercel/blob/client`, authorized by a short-lived token minted by `app/api/blob-upload/route.ts`. This is deliberate, not incidental — routing real phone-camera photos (3–10MB each) through a Server Action or Route Handler risks Vercel's serverless body-size ceiling (Server Actions cap at 1MB by default; general function limits are ~4.5MB). Client-direct upload means file bytes never pass through a Next.js server function at all. Only after all 4 uploads resolve does the client call `submitIntake()` (a Server Action) with the resulting URLs.
 
 **Conventions for the agent when generating or editing frontend code:**
-- Keep `N8N_INTAKE_WEBHOOK_URL` and `N8N_STATUS_WEBHOOK_URL` in Vercel environment variables — never hardcode a webhook URL in committed code.
-- Prefer routing webhook calls through Next.js route handlers/server actions rather than calling n8n directly from client-side JS, so the webhook URLs aren't exposed in the browser bundle.
+- Keep `N8N_INTAKE_WEBHOOK_URL`, `N8N_STATUS_WEBHOOK_URL`, and `BLOB_READ_WRITE_TOKEN` in environment variables (`frontend/.env.local` locally, Vercel project settings in deployment) — never hardcode a webhook URL or token in committed code. `frontend/.env.example` documents all three.
+- Prefer routing webhook calls through Next.js Route Handlers/Server Actions rather than calling n8n directly from client-side JS, so the webhook URLs aren't exposed in the browser bundle. The one exception is the Blob upload itself, which is intentionally client-direct (see above) — it doesn't touch the n8n webhooks.
 - Don't duplicate pipeline logic (render triggering, status computation) in the frontend — it should only submit, poll, and display.
+- The status proxy (`app/api/status/route.ts`) treats a 404 from the n8n status webhook as still-pending, not an error — the intake workflow responds with a `submissionId` in parallel with (not gated on) its Data Table row write, so a client can legitimately poll before that row exists.
 - Use Vercel preview deployments to test form/UI changes before promoting to production.
 
-## 8. Implementation Status
+## 8. Frontend Design Direction
 
-- **n8n workflows built**: `Listing Video Intake, Render & Poll` (id `BMyhNSqHqSUqgENA`) and `Listing Video Status Check` (id `ZWPqwUobRM0MRQ3J`), both in Tito's personal n8n project.
+The intake form and status page are deliberately styled as a two-act experience rather than a generic SaaS form:
+
+- **Act I — the intake slip** (`/`): warm kraft-paper palette (`--paper`, `--paper-card`, `--ink`, `--stamp` red, `--brass`), a heavy poster slab serif (Alfa Slab One) for headlines, and a typewriter face (Special Elite) for labels/badges — evokes a real estate office's paper intake ticket, not an editorial cream-and-serif template. Signature element: a rotated rubber-stamp badge ("Listing Intake · File No. ####") that settles into place on load.
+- **Act II — the screening room** (`/status/[submissionId]`): dark near-black palette with an amber "projector" accent, same typewriter face for the status readout. Signature element: a 12-tick film-leader countdown ring that glows while pending, replaced by a "Now Showing" panel with a one-time light-sweep animation on completion.
+- Both scenes respect `prefers-reduced-motion` and have visible keyboard focus rings in their own accent color.
+- Design tokens live in `frontend/src/app/globals.css` (`@theme inline` block); fonts are loaded via `next/font/google` in `frontend/src/app/layout.tsx`.
+
+## 9. Implementation Status
+
+- **n8n workflows built and ACTIVE**: `Listing Video Intake, Render & Poll` (id `BMyhNSqHqSUqgENA`) and `Listing Video Status Check` (id `ZWPqwUobRM0MRQ3J`), both in Tito's personal n8n project. **Both must stay toggled active** for their production webhook URLs to respond — this was a real gap caught late: all early testing used the MCP `execute_workflow` tool (manual test mode), which works regardless of active state, so the production webhook 404ing was only discovered once the real frontend called it directly.
 - **n8n Data Table `ListingVideoJobs`** (id `2j4dIhU0LEFKBFA8`) created and wired into both workflows.
 - **Google Sheets credential reconnected** and **Agents sheet created** (tab "Agents" in the "Real_Estate_Video_Generator" spreadsheet) — Agent Lookup is wired to the real spreadsheet/tab, not a placeholder.
-- **Realtor photo now comes from a frontend upload** (`realtorPhotoUrl` intake field), not the Sheets `HeadshotUrl` lookup — `Generate Submission ID` and `Trigger Creatomate Render` were updated accordingly.
-- **Creatomate template's closing scene** now has `Realtor-Name`, `Realtor-Phone`, and `Realtor's-email` text elements alongside `Realtor-Photo` — all wired into the render request.
-- **Creatomate credential created** (`httpBearerAuth`, named "Creatomate API") and attached to both `Trigger Creatomate Render` and `Check Render Status`.
-- **First real end-to-end test render succeeded** (execution 66, 2026-07-21): intake → agent lookup → Creatomate render → poll → `complete`, with a real playable video URL written to the Data Table. `CTA-Text` was patched to strip a leading `@` from the Instagram handle before re-adding it, since the sheet value already included one.
-- **Not built yet**: the Vercel frontend (`/frontend/` is still empty) — the pipeline itself is fully functional and tested via direct webhook calls.
-- The Vercel frontend itself has not been built yet — `/frontend/` is still empty.
+- **Realtor photo comes from a frontend upload** (`realtorPhotoUrl` intake field), not a Sheets `HeadshotUrl` lookup.
+- **Creatomate template's closing scene** has `Realtor-Name`, `Realtor-Phone`, and `Realtor's-email` text elements alongside `Realtor-Photo` — all wired into the render request. Creatomate credential (`httpBearerAuth`, "Creatomate API") attached to both HTTP nodes.
+- **End-to-end test renders succeeded** multiple times, including a real one triggered through the live production webhooks (not just manual test execution) with the actual frontend after activation.
+- **Frontend built**: `/frontend/` is a working Next.js app — intake form with client-direct Blob photo uploads, Server Action submit, status page with polling. `npm run build` passes. Not yet deployed to Vercel — see §7 for the env vars it needs once deployed.
 
-## 9. Conventions for the Agent
+## 10. Conventions for the Agent
 
 - Never commit `.env`, or anything under `/temp/outputs/` or `/temp/resources/` — these are gitignored scratch/output space, not deliverables.
 - n8n workflow JSON exports live in `/workflows/`. Once the Creatomate-only baseline is tested and working, tag/branch it (e.g. `v1-ken-burns`) before any future AI-animation upgrade is merged in.
