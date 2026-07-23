@@ -11,6 +11,7 @@ type Photos = {
   photo1: File | null;
   photo2: File | null;
   photo3: File | null;
+  photo4: File | null;
   realtor: File | null;
 };
 
@@ -18,6 +19,7 @@ const emptyPhotos: Photos = {
   photo1: null,
   photo2: null,
   photo3: null,
+  photo4: null,
   realtor: null,
 };
 
@@ -56,7 +58,11 @@ export function IntakeForm() {
   const [error, setError] = useState<string | null>(null);
 
   const allPhotosSelected =
-    photos.photo1 && photos.photo2 && photos.photo3 && photos.realtor;
+    photos.photo1 &&
+    photos.photo2 &&
+    photos.photo3 &&
+    photos.photo4 &&
+    photos.realtor;
 
   function updateField(name: keyof typeof fields, value: string) {
     setFields((prev) => ({ ...prev, [name]: value }));
@@ -67,16 +73,17 @@ export function IntakeForm() {
     setError(null);
 
     if (!allPhotosSelected) {
-      setError("All four photos are required before you can cut the trailer.");
+      setError("All five photos are required before you can cut the trailer.");
       return;
     }
 
     try {
       setStatus("uploading");
-      const [photo1, photo2, photo3, realtorPhoto] = await Promise.all([
+      const [photo1, photo2, photo3, photo4, realtorPhoto] = await Promise.all([
         uploadPhoto(photos.photo1!, "photo1"),
         uploadPhoto(photos.photo2!, "photo2"),
         uploadPhoto(photos.photo3!, "photo3"),
+        uploadPhoto(photos.photo4!, "photo4"),
         uploadPhoto(photos.realtor!, "realtor"),
       ]);
 
@@ -86,6 +93,7 @@ export function IntakeForm() {
         photo1Url: photo1.url,
         photo2Url: photo2.url,
         photo3Url: photo3.url,
+        photo4Url: photo4.url,
         realtorPhotoUrl: realtorPhoto.url,
       };
 
@@ -215,7 +223,7 @@ export function IntakeForm() {
 
           <section>
             <p className="slip-eyebrow">Photos</p>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
               <PhotoTile
                 label="Photo 1"
                 file={photos.photo1}
@@ -230,6 +238,11 @@ export function IntakeForm() {
                 label="Photo 3"
                 file={photos.photo3}
                 onChange={(f) => setPhotos((p) => ({ ...p, photo3: f }))}
+              />
+              <PhotoTile
+                label="Photo 4"
+                file={photos.photo4}
+                onChange={(f) => setPhotos((p) => ({ ...p, photo4: f }))}
               />
               <PhotoTile
                 label="You"

@@ -9,6 +9,7 @@ export interface IntakePayload {
   photo1Url: string;
   photo2Url: string;
   photo3Url: string;
+  photo4Url: string;
   realtorPhotoUrl: string;
   keyFeatures: string;
   description: string;
