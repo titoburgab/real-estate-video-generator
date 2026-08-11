@@ -1,0 +1,1468 @@
+{
+  "name": "Listing Video Intake, Render & Poll",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "listing-video-intake",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "72c37977-4386-4075-8427-38b4975b45a4",
+      "name": "Webhook - Intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        288
+      ],
+      "webhookId": "46caa7c8-2943-46d3-9338-425648c93f34"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "submission-id",
+              "name": "submissionId",
+              "value": "={{ $now.toMillis() }}-{{ Math.random().toString(36).slice(2,10) }}",
+              "type": "string"
+            },
+            {
+              "id": "submitter-email",
+              "name": "submitterEmail",
+              "value": "={{ ($json.body?.submitterEmail ?? $json.submitterEmail ?? \"\").toLowerCase().trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "address",
+              "name": "address",
+              "value": "={{ $json.body?.address ?? $json.address ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "price-formatted",
+              "name": "priceFormatted",
+              "value": "={{ $json.body?.price ?? $json.price ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "beds",
+              "name": "beds",
+              "value": "={{ $json.body?.beds ?? $json.beds ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "baths",
+              "name": "baths",
+              "value": "={{ $json.body?.baths ?? $json.baths ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "sqft",
+              "name": "sqft",
+              "value": "={{ $json.body?.sqft ?? $json.sqft ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "year-built",
+              "name": "yearBuilt",
+              "value": "={{ $json.body?.yearBuilt ?? $json.yearBuilt ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "photo-1",
+              "name": "photo1Url",
+              "value": "={{ $json.body?.photo1Url ?? $json.photo1Url ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "photo-2",
+              "name": "photo2Url",
+              "value": "={{ $json.body?.photo2Url ?? $json.photo2Url ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "photo-3",
+              "name": "photo3Url",
+              "value": "={{ $json.body?.photo3Url ?? $json.photo3Url ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "photo-4",
+              "name": "photo4Url",
+              "value": "={{ $json.body?.photo4Url ?? $json.photo4Url ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "realtor-photo",
+              "name": "realtorPhotoUrl",
+              "value": "={{ $json.body?.realtorPhotoUrl ?? $json.realtorPhotoUrl ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "description",
+              "name": "description",
+              "value": "={{ $json.body?.description ?? $json.description ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "movement-1",
+              "name": "movement1",
+              "value": "={{ $json.body?.movement1 ?? $json.movement1 ?? \"zoomIn\" }}",
+              "type": "string"
+            },
+            {
+              "id": "movement-2",
+              "name": "movement2",
+              "value": "={{ $json.body?.movement2 ?? $json.movement2 ?? \"zoomIn\" }}",
+              "type": "string"
+            },
+            {
+              "id": "movement-3",
+              "name": "movement3",
+              "value": "={{ $json.body?.movement3 ?? $json.movement3 ?? \"zoomIn\" }}",
+              "type": "string"
+            },
+            {
+              "id": "movement-4",
+              "name": "movement4",
+              "value": "={{ $json.body?.movement4 ?? $json.movement4 ?? \"zoomIn\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "ff91c7f2-9ac6-4433-a775-9b04f07f1a39",
+      "name": "Generate Submission ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"submissionId\": $json.submissionId, \"status\": \"submitted\" } }}",
+        "options": {}
+      },
+      "id": "2e12f4e6-2390-4c16-85cd-ca8443f90b37",
+      "name": "Respond - Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "submissionId": "={{ $json.submissionId }}",
+            "status": "submitted",
+            "pollAttempts": 0,
+            "agentEmail": "={{ $json.submitterEmail }}",
+            "rawIntakePayload": "={{ JSON.stringify($json) }}"
+          },
+          "schema": [
+            {
+              "id": "submissionId",
+              "displayName": "submissionId",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pollAttempts",
+              "displayName": "pollAttempts",
+              "type": "number",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "agentEmail",
+              "displayName": "agentEmail",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rawIntakePayload",
+              "displayName": "rawIntakePayload",
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9da69326-d0a8-41b0-a5e2-3632b031e3b8",
+      "name": "Log Submission",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1akzdENiWG3D4zu4zSLUv4B4xLrA98GO8-oDr1tA4uc4",
+          "cachedResultName": "Real_Estate_Video_Generator"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultName": "Agents"
+        },
+        "parameters": {}
+      },
+      "id": "20028df5-ab1d-4822-9a7f-ae32ff440588",
+      "name": "Agent Lookup",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        384
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.Email }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              },
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "caec0775-5c1f-4638-aaba-66b90c364ad5",
+      "name": "Agent Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        896,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.creatomate.com/v1/renders",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": {
+          "template_id": "48be3d34-9888-481c-8ebe-01778a49e255",
+          "modifications": {
+            "Photo-1": "={{ $(\"Generate Submission ID\").item.json.photo1Url }}",
+            "Photo-2": "={{ $(\"Generate Submission ID\").item.json.photo2Url }}",
+            "Photo-3": "={{ $(\"Generate Submission ID\").item.json.photo3Url }}",
+            "Realtor-Photo": "={{ $(\"Generate Submission ID\").item.json.realtorPhotoUrl }}",
+            "Address": "={{ $(\"Generate Submission ID\").item.json.address.replace(/,\\s*/, \",\\n\") }}",
+            "Details": "={{ $(\"Generate Submission ID\").item.json.beds }} bd · {{ $(\"Generate Submission ID\").item.json.baths }} ba · {{ $(\"Generate Submission ID\").item.json.sqft }} sqft · built {{ $(\"Generate Submission ID\").item.json.yearBuilt }}",
+            "Price": "={{ $(\"Generate Submission ID\").item.json.priceFormatted }}",
+            "CTA-Text": "={{ $json.Website }} / @{{ $json.Instagram.replace(/^@/, \"\") }}",
+            "Realtor-Name": "={{ $json.Name }}",
+            "Realtor-Phone": "={{ $json.Phone }}",
+            "Realtor's-email": "={{ $json.Email }}",
+            "Description": "={{ $(\"Generate Submission ID\").item.json.description }}",
+            "Video-01": "={{ $(\"Merge Clip Results\").item.json.clip1Url }}",
+            "Video-02": "={{ $(\"Merge Clip Results\").item.json.clip2Url }}",
+            "Video-03": "={{ $(\"Merge Clip Results\").item.json.clip3Url }}",
+            "Video-04": "={{ $(\"Merge Clip Results\").item.json.clip4Url }}",
+            "Realtor-picture": "={{ $(\"Generate Submission ID\").item.json.realtorPhotoUrl }}",
+            "Realtor-Email": "={{ $json.Email }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "e00e6912-7ca4-4920-87fa-43ab1db6f43c",
+      "name": "Trigger Creatomate Render",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        3820,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "rendering",
+            "creatomateRenderId": "={{ $json.id }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "creatomateRenderId",
+              "displayName": "creatomateRenderId",
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd843fba-5fb2-485e-bafd-f53dcb06249d",
+      "name": "Mark Rendering",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        4044,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "id": "d1954bd4-f039-453f-8b8c-ec518089b94f",
+      "name": "Poll Delay",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4268,
+        288
+      ],
+      "webhookId": "9ffe3506-b315-4ea5-849a-b303303904cf"
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://api.creatomate.com/v1/renders/\" + $(\"Trigger Creatomate Render\").item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "id": "e4b562b9-d0e7-4d97-a55f-f219f8ac34eb",
+      "name": "Check Render Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        4492,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "poll-attempts",
+              "name": "pollAttempts",
+              "value": "={{ $runIndex }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "9b85d4ba-d33e-4bd3-8178-0f6de8bf9e74",
+      "name": "Increment Poll Count",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4716,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "succeeded"
+                  }
+                ]
+              }
+            },
+            {
+              "conditions": {
+                "combinator": "and",
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "rightValue": "failed"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "Still Processing"
+        }
+      },
+      "id": "1950860b-f584-40a5-b1cb-6154cd88a6c4",
+      "name": "Render Status?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        4940,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "complete",
+            "videoUrl": "={{ $json.url }}",
+            "pollAttempts": "={{ $json.pollAttempts }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "videoUrl",
+              "displayName": "videoUrl",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pollAttempts",
+              "displayName": "pollAttempts",
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a4b3deab-e068-48cc-9bbd-034bba4d5b11",
+      "name": "Mark Complete",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5164,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "error",
+            "errorMessage": "={{ $json.error_message }}",
+            "pollAttempts": "={{ $json.pollAttempts }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pollAttempts",
+              "displayName": "pollAttempts",
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "527912d8-710e-4e1d-8964-4c8d1e406ce4",
+      "name": "Mark Error",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5164,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.pollAttempts }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 40
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a89aa7f5-94e8-4e97-8647-7fc3b366bc5a",
+      "name": "Poll Cap Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        5164,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "error",
+            "errorMessage": "Render polling timed out",
+            "pollAttempts": "={{ $json.pollAttempts }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pollAttempts",
+              "displayName": "pollAttempts",
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "18a16e3b-ee75-431b-81e7-f5ec0f4d34a8",
+      "name": "Mark Timeout Error",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        5388,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "agent_not_found",
+            "errorMessage": "={{ \"No agent roster entry for \" + $(\"Generate Submission ID\").item.json.submitterEmail }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "077e3ea8-0a3e-4623-8761-03eea9f6cbff",
+      "name": "Mark Agent Not Found",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        480
+      ]
+    },
+    {
+      "id": "e8d14ab0-093e-480b-96a1-a925449796b6",
+      "name": "Send Video Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        5388,
+        0
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.agentEmail }}",
+        "subject": "={{ \"Your listing video is ready — \" + $(\"Generate Submission ID\").item.json.address }}",
+        "emailType": "html",
+        "message": "={{ \"<p>Hi \" + $(\"Agent Lookup\").item.json.Name + \",</p><p>Your listing video for <strong>\" + $(\"Generate Submission ID\").item.json.address + \"</strong> is ready.</p><p><a href='\" + $json.videoUrl + \"'>Download the video</a></p><p>This is a backup copy in case you navigated away from the status page — the video is also available there.</p>\" }}",
+        "options": {}
+      },
+      "webhookId": "df5c7028-8f36-4a3b-b8dd-9cfe58a283d5"
+    },
+    {
+      "id": "9efe5e48-8099-4cec-b6c7-520c0877ee2a",
+      "name": "Mark Animating",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        650
+      ],
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "animating"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "5aed7e9d-d2a2-4309-9634-949066a798e1",
+      "name": "Build Clip Jobs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        650
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const src = $(\"Generate Submission ID\").item.json;\nconst NEGATIVE_PROMPT = `extra people, human figures, pets, animals, invented furniture, new doorways, new rooms, new wall art, new decor, extra windows, warped architecture, duplicated columns, distorted geometry, morphing walls, glass reflections, mirror artifacts, ghosting, flat sliding image, static crop zoom, digital zoom artifact, watermark, text overlay, blurry, low quality artifacts`;\nconst prompts = {\n  zoomIn: `Camera starts framing the center of the room at approximately 35% into the original photo, then performs a slow, smooth cinematic push-in, continuing to advance gently toward the center. The motion should have a natural sense of depth — foreground elements move and grow slightly more than elements further back, giving the push-in a subtle three-dimensional feel rather than a flat, static image zoom. Keep this effect subtle and natural, not exaggerated. Camera stays locked on-axis, moving forward only, no lateral movement. Preserve exact room contents, furniture, layout, lighting, and architecture from the source image — do not add, invent, or hallucinate any objects, doors, windows, reflections, or elements not visible in the original photo. Vertical lines on walls, windows, and door frames stay perfectly straight throughout. Realistic depth of field, sharp focus maintained on foreground and midground. Natural shadow behavior as the camera moves closer. Professional real estate videography quality, steady and clean, 5–6 seconds.`,\n  panRight: `Camera starts zoomed in at approximately 35% of the original photo, positioned toward the left side of the room, then performs a very slow, subtle pan to the right — a gentle lateral drift within the space already shown in the original photo. The camera moves to the right throughout the shot, but the pan distance is minimal: the framing should stay almost entirely within content already fully visible in the source image, revealing at most a bare sliver of new space at the very right edge. Do not reveal an entire new area of the room, a new doorway, new furniture, or a new room. If any new space becomes visible at the edge, it must be minimal and visually consistent with the existing wall, floor, and ceiling — absolutely no new furniture, doors, cabinets, decor, artwork, or rooms that are not already visible in the original photo. Preserve exact room contents, furniture, layout, lighting, and architecture — do not add, invent, or hallucinate any objects, doors, windows, people, reflections, or elements not visible in the original photo. Vertical lines on walls, windows, and door frames stay perfectly straight throughout. Natural parallax, foreground elements shift slightly faster than the background. Realistic depth of field and shadow behavior. Professional real estate videography quality, steady and clean, 5–6 seconds.`,\n  panLeft: `Camera starts zoomed in at approximately 35% of the original photo, positioned toward the right side of the room, then performs a very slow, subtle pan to the left — a gentle lateral drift within the space already shown in the original photo. The camera moves to the left throughout the shot, but the pan distance is minimal: the framing should stay almost entirely within content already fully visible in the source image, revealing at most a bare sliver of new space at the very left edge. Do not reveal an entire new area of the room, a new doorway, new furniture, or a new room. If any new space becomes visible at the edge, it must be minimal and visually consistent with the existing wall, floor, and ceiling — absolutely no new furniture, doors, cabinets, decor, artwork, or rooms that are not already visible in the original photo. Preserve exact room contents, furniture, layout, lighting, and architecture — do not add, invent, or hallucinate any objects, doors, windows, people, reflections, or elements not visible in the original photo. Vertical lines on walls, windows, and door frames stay perfectly straight throughout. Natural parallax, foreground elements shift slightly faster than the background. Realistic depth of field and shadow behavior. Professional real estate videography quality, steady and clean, 5–6 seconds.`,\n  zoomOut: `Camera starts framing the center of the room at approximately 35% into the original photo, then performs a slow, smooth pull-back, gradually revealing the wider room until the final frame matches the full original source image exactly. The motion should have a natural sense of depth — foreground elements move and shrink slightly more than elements further back, giving the pull-back a subtle three-dimensional feel rather than a flat, static image zoom. Keep this effect subtle and natural, not exaggerated. Camera moves backward only, no lateral movement. The end framing must not extend beyond the boundaries of the original photo — no invented space, walls, or rooms beyond what the source image contains. Preserve exact room contents, furniture, layout, lighting, and architecture from the source image — do not add, invent, or hallucinate any objects, doors, windows, reflections, or elements not visible in the original photo. Vertical lines on walls, windows, and door frames stay perfectly straight throughout. Natural parallax, foreground elements shift slightly faster than the background as the camera pulls back. Realistic depth of field and shadow behavior. Professional real estate videography quality, steady and clean, 5–6 seconds.`,\n};\nreturn [1, 2, 3, 4].map(n => ({\n  json: {\n    photoIndex: n,\n    photoUrl: src[`photo${n}Url`],\n    movementId: src[`movement${n}`] || \"zoomIn\",\n    prompt: prompts[src[`movement${n}`]] || prompts.zoomIn,\n    negativePrompt: NEGATIVE_PROMPT,\n  },\n  pairedItem: { item: 0 },\n}));"
+      }
+    },
+    {
+      "id": "c3442217-5fea-4aac-9370-a9065fb15a38",
+      "name": "Submit to Higgsfield",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1568,
+        650
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://platform.higgsfield.ai/v1/image2video/kling",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": {
+          "params": {
+            "input_image": {
+              "type": "image_url",
+              "image_url": "={{ $json.photoUrl }}"
+            },
+            "prompt": "={{ $json.prompt }}",
+            "negative_prompt": "={{ $json.negativePrompt }}",
+            "model": "kling-v2-1-master"
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "38f26941-c34e-4341-b430-9a09697244cb",
+      "name": "Poll Delay - Higgsfield",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1792,
+        650
+      ],
+      "parameters": {
+        "amount": 15
+      },
+      "webhookId": "566b750b-c45b-497e-ad5b-685574141581"
+    },
+    {
+      "id": "e7753b49-dccf-46b0-8c9b-899b1ef583d7",
+      "name": "Check Higgsfield Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2016,
+        650
+      ],
+      "parameters": {
+        "url": "={{ \"https://platform.higgsfield.ai/requests/\" + $(\"Submit to Higgsfield\").item.json.id + \"/status\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      }
+    },
+    {
+      "id": "48e926a4-966d-4b90-9e6f-4294e6dc6017",
+      "name": "Increment Poll Count (HF)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        650
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "poll-attempts-hf",
+              "name": "pollAttempts",
+              "value": "={{ $runIndex }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "79200197-5146-4fde-8d2f-6eefe7c1a1ea",
+      "name": "Compute Terminal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2464,
+        650
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const TERMINAL = [\"completed\", \"failed\", \"nsfw\", \"canceled\"];\nconst items = $input.all();\nconst allTerminal = items.every(it => TERMINAL.includes(it.json.status));\nfor (const it of items) {\n  it.json.terminal = TERMINAL.includes(it.json.status);\n  it.json.allTerminal = allTerminal ? \"true\" : \"false\";\n}\nreturn items;"
+      }
+    },
+    {
+      "id": "6f0e3eb9-5eaf-4d46-a91f-58685962bec8",
+      "name": "All Clips Terminal?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2688,
+        650
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.allTerminal }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "872835e7-9aa7-4a4f-9bfa-6eceaf082a70",
+      "name": "Higgsfield Poll Cap Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2688,
+        820
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.pollAttempts }}",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "rightValue": 50
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "93654022-29f9-47d7-9c7a-d470ed03ffc6",
+      "name": "Mark Clip Timeout Error",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2912,
+        900
+      ],
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "error",
+            "errorMessage": "Clip generation polling timed out",
+            "pollAttempts": "={{ $json.pollAttempts }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pollAttempts",
+              "displayName": "pollAttempts",
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "a6565a50-1090-450e-a3f6-554e38d06889",
+      "name": "Merge Clip Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2912,
+        650
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const items = $input.all();\nconst bySlot = {};\nfor (let i = 0; i < items.length; i++) {\n  const status = items[i].json;\n  const job = $(\"Build Clip Jobs\").itemMatching(i).json;\n  bySlot[job.photoIndex] = { status: status.status, clipUrl: status.video?.url ?? null };\n}\nconst failedSlots = Object.entries(bySlot).filter(([, s]) => s.status !== \"completed\");\nreturn [{\n  json: {\n    clip1Url: bySlot[1]?.clipUrl,\n    clip2Url: bySlot[2]?.clipUrl,\n    clip3Url: bySlot[3]?.clipUrl,\n    clip4Url: bySlot[4]?.clipUrl,\n    anyClipFailed: failedSlots.length > 0 ? \"true\" : \"false\",\n    errorSummary: failedSlots.map(([slot, s]) => `Photo ${slot} clip ${s.status}`).join(\"; \"),\n  },\n  pairedItem: { item: 0 },\n}];"
+      }
+    },
+    {
+      "id": "dc89d4a9-6b29-4da2-81d6-3c83fb80b19b",
+      "name": "Any Clip Failed?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3136,
+        650
+      ],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.anyClipFailed }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "rightValue": "true"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "2484cb49-48d2-4c5d-b84e-9eb559924719",
+      "name": "Mark Clip Error",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        3360,
+        750
+      ],
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "submissionId",
+              "keyValue": "={{ $(\"Generate Submission ID\").item.json.submissionId }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "error",
+            "errorMessage": "={{ $json.errorSummary }}"
+          },
+          "schema": [
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "errorMessage",
+              "displayName": "errorMessage",
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Intake": {
+      "main": [
+        [
+          {
+            "node": "Generate Submission ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Submission ID": {
+      "main": [
+        [
+          {
+            "node": "Respond - Accepted",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Log Submission",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Submission": {
+      "main": [
+        [
+          {
+            "node": "Agent Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Lookup": {
+      "main": [
+        [
+          {
+            "node": "Agent Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent Found?": {
+      "main": [
+        [
+          {
+            "node": "Mark Animating",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Agent Not Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Creatomate Render": {
+      "main": [
+        [
+          {
+            "node": "Mark Rendering",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Rendering": {
+      "main": [
+        [
+          {
+            "node": "Poll Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Delay": {
+      "main": [
+        [
+          {
+            "node": "Check Render Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Render Status": {
+      "main": [
+        [
+          {
+            "node": "Increment Poll Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Poll Count": {
+      "main": [
+        [
+          {
+            "node": "Render Status?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Status?": {
+      "main": [
+        [
+          {
+            "node": "Mark Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Poll Cap Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Cap Check": {
+      "main": [
+        [
+          {
+            "node": "Mark Timeout Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Poll Delay",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Complete": {
+      "main": [
+        [
+          {
+            "node": "Send Video Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Animating": {
+      "main": [
+        [
+          {
+            "node": "Build Clip Jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Clip Jobs": {
+      "main": [
+        [
+          {
+            "node": "Submit to Higgsfield",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit to Higgsfield": {
+      "main": [
+        [
+          {
+            "node": "Poll Delay - Higgsfield",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Delay - Higgsfield": {
+      "main": [
+        [
+          {
+            "node": "Check Higgsfield Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Higgsfield Status": {
+      "main": [
+        [
+          {
+            "node": "Increment Poll Count (HF)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Increment Poll Count (HF)": {
+      "main": [
+        [
+          {
+            "node": "Compute Terminal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compute Terminal": {
+      "main": [
+        [
+          {
+            "node": "All Clips Terminal?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All Clips Terminal?": {
+      "main": [
+        [
+          {
+            "node": "Merge Clip Results",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Higgsfield Poll Cap Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Higgsfield Poll Cap Check": {
+      "main": [
+        [
+          {
+            "node": "Mark Clip Timeout Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Poll Delay - Higgsfield",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Clip Results": {
+      "main": [
+        [
+          {
+            "node": "Any Clip Failed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Clip Failed?": {
+      "main": [
+        [
+          {
+            "node": "Mark Clip Error",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Trigger Creatomate Render",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "meta": {
+    "n8nWorkflowId": "BMyhNSqHqSUqgENA",
+    "exportedAt": "2026-08-11",
+    "note": "Exported via n8n MCP get_workflow_details for repo documentation. This is a point-in-time snapshot, not a live sync — re-export after future edits."
+  }
+}

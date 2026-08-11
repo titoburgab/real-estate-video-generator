@@ -1,0 +1,102 @@
+{
+  "name": "Listing Video Status Check",
+  "nodes": [
+    {
+      "id": "f0d94391-5c21-4930-b4d4-269dba5f9135",
+      "name": "Webhook - Status",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [0, 96],
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "listing-video-status",
+        "responseMode": "responseNode"
+      },
+      "webhookId": "c76051fe-38d1-4769-b1ad-9de3bf9567c3"
+    },
+    {
+      "id": "64762f2d-38a2-4881-af6b-b808772d34c8",
+      "name": "Get Job Row",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [224, 96],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "2j4dIhU0LEFKBFA8",
+          "cachedResultName": "ListingVideoJobs"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            { "keyName": "submissionId", "condition": "eq", "keyValue": "={{ $json.query.submissionId }}" }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "id": "5579bb57-c04b-44b8-ae01-98af4389ca79",
+      "name": "Job Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [448, 96],
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.submissionId }}", "operator": { "type": "string", "operation": "notEmpty" }, "rightValue": "" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "c27784c0-5265-4a40-b299-d1114bf6e661",
+      "name": "Respond - Status",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [672, 0],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": $json.status, \"videoUrl\": $json.videoUrl, \"errorMessage\": $json.errorMessage } }}"
+      }
+    },
+    {
+      "id": "c59b5a0c-fd92-4776-88ee-65c53de76f22",
+      "name": "Respond - Not Found",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [672, 192],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"error\": \"submission not found\" } }}",
+        "options": { "responseCode": 404 }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook - Status": { "main": [[{ "node": "Get Job Row", "type": "main", "index": 0 }]] },
+    "Get Job Row": { "main": [[{ "node": "Job Found?", "type": "main", "index": 0 }]] },
+    "Job Found?": {
+      "main": [
+        [{ "node": "Respond - Status", "type": "main", "index": 0 }],
+        [{ "node": "Respond - Not Found", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "meta": {
+    "n8nWorkflowId": "ZWPqwUobRM0MRQ3J",
+    "exportedAt": "2026-08-11",
+    "note": "Exported via n8n MCP get_workflow_details for repo documentation. This is a point-in-time snapshot, not a live sync — re-export after future edits."
+  }
+}
