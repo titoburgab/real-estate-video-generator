@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { submitIntake } from "@/app/actions";
-import type { IntakePayload } from "@/lib/types";
+import type { IntakePayload, MovementId } from "@/lib/types";
 import { PhotoTile } from "@/components/PhotoTile";
+import { MovementSelector } from "@/components/MovementSelector";
 
 type Photos = {
   photo1: File | null;
@@ -41,6 +42,17 @@ export function IntakeForm() {
   }, []);
 
   const [photos, setPhotos] = useState<Photos>(emptyPhotos);
+  const [movements, setMovements] = useState<{
+    movement1: MovementId;
+    movement2: MovementId;
+    movement3: MovementId;
+    movement4: MovementId;
+  }>({
+    movement1: "zoomIn",
+    movement2: "zoomIn",
+    movement3: "zoomIn",
+    movement4: "zoomIn",
+  });
   const [fields, setFields] = useState({
     address: "",
     price: "",
@@ -90,6 +102,7 @@ export function IntakeForm() {
       setStatus("submitting");
       const payload: IntakePayload = {
         ...fields,
+        ...movements,
         photo1Url: photo1.url,
         photo2Url: photo2.url,
         photo3Url: photo3.url,
@@ -223,27 +236,62 @@ export function IntakeForm() {
 
           <section>
             <p className="slip-eyebrow">Photos</p>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-              <PhotoTile
-                label="Photo 1"
-                file={photos.photo1}
-                onChange={(f) => setPhotos((p) => ({ ...p, photo1: f }))}
-              />
-              <PhotoTile
-                label="Photo 2"
-                file={photos.photo2}
-                onChange={(f) => setPhotos((p) => ({ ...p, photo2: f }))}
-              />
-              <PhotoTile
-                label="Photo 3"
-                file={photos.photo3}
-                onChange={(f) => setPhotos((p) => ({ ...p, photo3: f }))}
-              />
-              <PhotoTile
-                label="Photo 4"
-                file={photos.photo4}
-                onChange={(f) => setPhotos((p) => ({ ...p, photo4: f }))}
-              />
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="flex flex-col gap-2">
+                <PhotoTile
+                  label="Photo 1"
+                  file={photos.photo1}
+                  onChange={(f) => setPhotos((p) => ({ ...p, photo1: f }))}
+                />
+                <MovementSelector
+                  value={movements.movement1}
+                  onChange={(m) =>
+                    setMovements((v) => ({ ...v, movement1: m }))
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <PhotoTile
+                  label="Photo 2"
+                  file={photos.photo2}
+                  onChange={(f) => setPhotos((p) => ({ ...p, photo2: f }))}
+                />
+                <MovementSelector
+                  value={movements.movement2}
+                  onChange={(m) =>
+                    setMovements((v) => ({ ...v, movement2: m }))
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <PhotoTile
+                  label="Photo 3"
+                  file={photos.photo3}
+                  onChange={(f) => setPhotos((p) => ({ ...p, photo3: f }))}
+                />
+                <MovementSelector
+                  value={movements.movement3}
+                  onChange={(m) =>
+                    setMovements((v) => ({ ...v, movement3: m }))
+                  }
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <PhotoTile
+                  label="Photo 4"
+                  file={photos.photo4}
+                  onChange={(f) => setPhotos((p) => ({ ...p, photo4: f }))}
+                />
+                <MovementSelector
+                  value={movements.movement4}
+                  onChange={(m) =>
+                    setMovements((v) => ({ ...v, movement4: m }))
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 w-1/2 pr-1.5 sm:w-1/4">
               <PhotoTile
                 label="You"
                 sublabel="closing shot"

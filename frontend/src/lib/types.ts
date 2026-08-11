@@ -1,3 +1,5 @@
+export type MovementId = "zoomIn" | "panRight" | "panLeft" | "zoomOut";
+
 export interface IntakePayload {
   submitterEmail: string;
   address: string;
@@ -11,6 +13,10 @@ export interface IntakePayload {
   photo3Url: string;
   photo4Url: string;
   realtorPhotoUrl: string;
+  movement1: MovementId;
+  movement2: MovementId;
+  movement3: MovementId;
+  movement4: MovementId;
   keyFeatures: string;
   description: string;
 }
@@ -22,6 +28,7 @@ export interface IntakeResponse {
 
 export type JobStatus =
   | "submitted"
+  | "animating"
   | "rendering"
   | "complete"
   | "error"

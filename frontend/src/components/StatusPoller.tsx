@@ -80,7 +80,11 @@ export function StatusPoller({ submissionId }: { submissionId: string }) {
           <LeaderRing />
           <div>
             <p className="font-display text-2xl text-room-text">
-              {status === "rendering" ? "Developing…" : "In the queue…"}
+              {status === "rendering"
+                ? "Developing…"
+                : status === "animating"
+                  ? "Animating the walkthrough…"
+                  : "In the queue…"}
             </p>
             <p className="mt-3 max-w-sm text-room-muted">
               Don&apos;t close this window — your trailer is being cut. This
